@@ -1,0 +1,6 @@
+build/
+vcpkg_installed/
+.cache/
+*.wasm.map
+.gm/
+.agentplug-kv/

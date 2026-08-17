@@ -1,0 +1,99 @@
+name: release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+env:
+  VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+jobs:
+  build-artifact:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            preset: x64-linux-release
+            artifact: liqology-x64-linux
+          - os: ubuntu-24.04-arm
+            preset: arm64-linux-release
+            artifact: liqology-arm64-linux
+          - os: windows-latest
+            preset: x64-windows-release
+            artifact: liqology-x64-windows
+          - os: windows-11-arm
+            preset: arm64-windows-release
+            artifact: liqology-arm64-windows
+          - os: macos-13
+            preset: x64-macos-release
+            artifact: liqology-x64-macos
+          - os: macos-latest
+            preset: arm64-macos-release
+            artifact: liqology-arm64-macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Bootstrap vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+          git -C "$VCPKG_ROOT" checkout 2026.06.24
+          "$VCPKG_ROOT/bootstrap-vcpkg.sh" || "$VCPKG_ROOT/bootstrap-vcpkg.bat"
+        shell: bash
+      - name: Configure + build
+        run: |
+          cmake --preset ${{ matrix.preset }}
+          cmake --install build/${{ matrix.preset }} --prefix out/${{ matrix.artifact }}
+        shell: bash
+      - name: Package
+        run: tar czf ${{ matrix.artifact }}.tar.gz -C out ${{ matrix.artifact }}
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.tar.gz
+
+  build-wasip1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install wasi-sdk
+        run: |
+          curl -fsSL -o wasi-sdk.tar.gz https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-24/wasi-sdk-24.0-x86_64-linux.tar.gz
+          mkdir -p /opt/wasi-sdk
+          tar xf wasi-sdk.tar.gz -C /opt/wasi-sdk --strip-components=1
+          echo "WASI_SDK_PREFIX=/opt/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Bootstrap vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+          git -C "$VCPKG_ROOT" checkout 2026.06.24
+          "$VCPKG_ROOT/bootstrap-vcpkg.sh"
+      - name: Configure + build
+        run: |
+          cmake --preset wasip1-release
+          cmake --build build/wasip1-release
+      - name: Package
+        run: |
+          mkdir -p out/liqology-wasip1
+          cp build/wasip1-release/examples/hello/liqology_hello.wasm out/liqology-wasip1/
+          cp -r include out/liqology-wasip1/
+          tar czf liqology-wasip1.tar.gz -C out liqology-wasip1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liqology-wasip1
+          path: liqology-wasip1.tar.gz
+
+  publish-release:
+    needs: [build-artifact, build-wasip1]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: Flatten artifacts
+        run: find dist -name '*.tar.gz' -exec mv {} dist/ \;
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.tar.gz
+          generate_release_notes: true

@@ -1,0 +1,5 @@
+add_executable(liqology_memory_loop main.cpp)
+target_link_libraries(liqology_memory_loop PRIVATE liqology::liqology)
+if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
+    set_target_properties(liqology_memory_loop PROPERTIES SUFFIX ".wasm")
+endif()

@@ -1,0 +1,138 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "debug",
+      "inherits": "base",
+      "displayName": "Native debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "release",
+      "inherits": "base",
+      "displayName": "Native release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
+    },
+    {
+      "name": "asan",
+      "inherits": "base",
+      "displayName": "AddressSanitizer",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address -fno-omit-frame-pointer -g",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address"
+      }
+    },
+    {
+      "name": "ubsan",
+      "inherits": "base",
+      "displayName": "UndefinedBehaviorSanitizer",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer -g",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=undefined"
+      }
+    },
+    {
+      "name": "asan-ubsan",
+      "inherits": "base",
+      "displayName": "ASan + UBSan combined",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer -g",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    },
+    {
+      "name": "x64-linux-release",
+      "inherits": "release",
+      "displayName": "x64 Linux release",
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-linux" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    },
+    {
+      "name": "arm64-linux-release",
+      "inherits": "release",
+      "displayName": "arm64 Linux cross release",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "arm64-linux",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "x64-windows-release",
+      "inherits": "release",
+      "displayName": "x64 Windows release",
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows" }
+    },
+    {
+      "name": "arm64-windows-release",
+      "inherits": "release",
+      "displayName": "arm64 Windows release",
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm64-windows" }
+    },
+    {
+      "name": "x64-macos-release",
+      "inherits": "release",
+      "displayName": "x64 macOS release",
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-osx" }
+    },
+    {
+      "name": "arm64-macos-release",
+      "inherits": "release",
+      "displayName": "arm64 macOS release",
+      "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm64-osx" }
+    },
+    {
+      "name": "wasip1-release",
+      "inherits": "base",
+      "displayName": "wasm32-wasip1 release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "VCPKG_TARGET_TRIPLET": "wasm32-wasip1",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-triplets",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/wasip1.toolchain.cmake",
+        "LIQOLOGY_BUILD_EXAMPLES": "ON"
+      }
+    },
+    {
+      "name": "wasip1-threads-release",
+      "inherits": "base",
+      "displayName": "wasm32-wasip1-threads release (agentplug-liqology plugin)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "VCPKG_TARGET_TRIPLET": "wasm32-wasip1-threads",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg-triplets",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/wasip1-threads.toolchain.cmake",
+        "LIQOLOGY_BUILD_EXAMPLES": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "debug", "configurePreset": "debug" },
+    { "name": "release", "configurePreset": "release" },
+    { "name": "asan", "configurePreset": "asan" },
+    { "name": "ubsan", "configurePreset": "ubsan" },
+    { "name": "asan-ubsan", "configurePreset": "asan-ubsan" },
+    { "name": "x64-linux-release", "configurePreset": "x64-linux-release" },
+    { "name": "arm64-linux-release", "configurePreset": "arm64-linux-release" },
+    { "name": "x64-windows-release", "configurePreset": "x64-windows-release" },
+    { "name": "arm64-windows-release", "configurePreset": "arm64-windows-release" },
+    { "name": "x64-macos-release", "configurePreset": "x64-macos-release" },
+    { "name": "arm64-macos-release", "configurePreset": "arm64-macos-release" },
+    { "name": "wasip1-release", "configurePreset": "wasip1-release" },
+    { "name": "wasip1-threads-release", "configurePreset": "wasip1-threads-release" }
+  ]
+}
