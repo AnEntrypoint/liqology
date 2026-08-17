@@ -79,6 +79,21 @@ public:
 
     [[nodiscard]] const std::vector<Interaction>& entries() const { return entries_; }
 
+    [[nodiscard]] const CostBalancePolicy& policy() const { return policy_; }
+
+    void set_policy(CostBalancePolicy new_policy) { policy_ = new_policy; }
+
+    [[nodiscard]] std::vector<InteractionId> preview_prune() const {
+        std::vector<InteractionId> would_evict;
+        for (const auto& entry : entries_) {
+            const bool below_retention_floor = entry.retention_weight < policy_.prune_retention_floor;
+            if (below_retention_floor && !is_worth_reinforming_instead_of_retaining(entry)) {
+                would_evict.push_back(entry.id);
+            }
+        }
+        return would_evict;
+    }
+
 private:
     MemoryStore(std::size_t embedding_dim, CostBalancePolicy policy)
         : dim_(embedding_dim), policy_(policy), relevance_index_(embedding_dim) {}
