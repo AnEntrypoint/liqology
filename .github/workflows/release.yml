@@ -117,6 +117,7 @@ jobs:
 
   publish-release:
     needs: [build-artifact, build-wasip1, build-agentplug-plugin]
+    if: always() && needs.build-wasip1.result == 'success' && needs.build-agentplug-plugin.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
