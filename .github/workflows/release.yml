@@ -42,20 +42,6 @@ jobs:
           git -C "$VCPKG_ROOT" checkout 2026.06.24
           "$VCPKG_ROOT/bootstrap-vcpkg.sh" || "$VCPKG_ROOT/bootstrap-vcpkg.bat"
         shell: bash
-      - name: Remove Visual Studio's bundled LLVM Flang from PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          # windows-latest now bundles VS 2026's own LLVM Flang (flang.exe), which CMake's
-          # Fortran auto-detection finds before vcpkg's own vcpkg-gfortran package registers
-          # itself mid-build -- lapack-reference then compiles against Flang instead of the
-          # gfortran-15.2.0 vcpkg actually pinned, and Flang's iso_fortran_env support fails
-          # to parse LAPACK's real32/tol/zero-style module usage. Strip any PATH entry that
-          # contains VS's LLVM tools dir so CMake can only resolve the vcpkg-provided compiler.
-          $filtered = $env:PATH -split ';' | Where-Object { $_ -notmatch 'Llvm\\x64\\bin' }
-          $newPath = $filtered -join ';'
-          Write-Host "Removed $((($env:PATH -split ';').Count) - $filtered.Count) VS LLVM PATH entries"
-          "PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Install libomp (macOS)
         if: runner.os == 'macOS'
         run: |
