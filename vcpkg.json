@@ -1,6 +1,6 @@
 {
   "name": "liqology",
-  "version-string": "0.1.0",
+  "version-string": "0.1.1",
   "description": "A liquid ontology platform: disambiguates entities via FAISS vector search, groups them into neuron-connectable buckets, and refines bucket relationships via a liquid neural net (parallelizable Euler-discretized liquid time-constant update). Built on a C++23 boilerplate closing the ergonomic gap with Rust: typed Result<T,E>, GSL ownership, deterministic packaging, sanitizer-gated CI, wasip1 + native cross-compilation.",
   "homepage": "https://github.com/AnEntrypoint/liqology",
   "license": "MIT OR Apache-2.0",
