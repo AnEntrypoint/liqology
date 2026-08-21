@@ -56,6 +56,17 @@ jobs:
           $newPath = $filtered -join ';'
           Write-Host "Removed $((($env:PATH -split ';').Count) - $filtered.Count) VS LLVM PATH entries"
           "PATH=$newPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Install libomp (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install libomp
+          LIBOMP_PREFIX="$(brew --prefix libomp)"
+          {
+            echo "OpenMP_ROOT=$LIBOMP_PREFIX"
+            echo "CPPFLAGS=-I$LIBOMP_PREFIX/include"
+            echo "LDFLAGS=-L$LIBOMP_PREFIX/lib"
+          } >> "$GITHUB_ENV"
+        shell: bash
       - name: Configure + build
         run: |
           cmake --preset ${{ matrix.preset }}

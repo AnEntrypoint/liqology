@@ -10,6 +10,7 @@ find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(Boost CONFIG COMPONENTS container QUIET)
 find_package(tl-expected CONFIG QUIET)
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "WASI")
+    find_package(OpenMP REQUIRED COMPONENTS CXX)
     find_package(faiss CONFIG REQUIRED)
 endif()
 
