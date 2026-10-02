@@ -1,23 +1,24 @@
 #include "omp.h"
 
-// wasm32-wasip1 (this plugin's reactor model) is single-threaded --
-// these are the real single-thread-correct semantics for every omp_*
-// FAISS calls, not placeholders: max_threads/num_threads=1, thread_num=0,
-// in_parallel=false, locks degrade to a plain non-reentrant flag since
-// there is never a second thread to contend with.
+namespace {
+
+constexpr int single_thread_count = 1;
+constexpr int primary_thread_number = 0;
+
+}
 
 extern "C" {
 
 int omp_get_max_threads(void) {
-    return 1;
+    return single_thread_count;
 }
 
 int omp_get_num_threads(void) {
-    return 1;
+    return single_thread_count;
 }
 
 int omp_get_thread_num(void) {
-    return 0;
+    return primary_thread_number;
 }
 
 int omp_in_parallel(void) {

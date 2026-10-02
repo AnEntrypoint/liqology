@@ -40,18 +40,18 @@ auto describe_error(ParseError err) -> const char* {
     return "unknown";
 }
 
-// Deliberate injected out-of-bounds write behind --inject-bug, for ASan/UBSan demonstration.
-void inject_bug() {
+void demonstrate_asan_out_of_bounds_write() {
     auto buffer = liqology::make_box<int[]>(4);
-    buffer[4] = 1;  // one past the end: ASan heap-buffer-overflow
+    const auto out_of_bounds_index = 4;
+    buffer[out_of_bounds_index] = 1;
     std::printf("unreachable if ASan is active: %d\n", buffer[4]);
 }
 
-}  // namespace
+}
 
 auto main(int argc, char** argv) -> int {
     if (argc > 1 && std::strcmp(argv[1], "--inject-bug") == 0) {
-        inject_bug();
+        demonstrate_asan_out_of_bounds_write();
         return 0;
     }
 
