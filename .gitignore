@@ -4,3 +4,5 @@ vcpkg_installed/
 *.wasm.map
 .gm/
 .agentplug-kv/
+config.bat
+node_modules
